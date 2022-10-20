@@ -1,0 +1,12 @@
+{% extends 'auth_test/base.html' %}
+{% block title %}
+  Product Login
+{% endblock %}
+
+{% block content %}
+  <h1>Product Login</h1>
+  {% if user.is_authenticated %}
+    <p>Hello! {{ user.first_name }} {{ user.last_name }}</p>
+    <p>Logged in as {{ user.username }}, close browser to continue.</p>
+  {% endif %}
+{% endblock %}

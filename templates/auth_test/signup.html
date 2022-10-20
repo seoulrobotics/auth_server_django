@@ -1,0 +1,35 @@
+{% extends 'auth_test/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  SENSR User Signup
+{% endblock %}
+
+{% block content %}
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+          crossorigin="anonymous"></script>
+  {% comment %} <script src="https://www.google.com/recaptcha/api.js?render={{ key }}"></script>
+  <script>
+    grecaptcha.ready(function() {
+        grecaptcha.execute("{{ key }}", {action: 'signup'})
+        .then(function(token) {
+            document.getElementById('g-recaptcha-response').value = token;
+        });
+    });
+  </script> {% endcomment %}
+
+  {% if user.is_authenticated %}
+    <p>Already logged in {{ user.username }}, close browser</p> 
+  {% else %}
+    <form id="signupform" class="signup" method="POST">
+      {% csrf_token %}
+      <br />
+      <br />
+      {% if error %}
+        <h5> {{ error }} </h5>
+      {% endif %}
+      
+      {% crispy form %}
+    </form>
+  {% endif %}
+{% endblock %}
