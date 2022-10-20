@@ -2,6 +2,7 @@ from django.core import exceptions
 
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -9,15 +10,33 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from .forms import LoginForm, SignupForm
 from django.conf import settings
-
-
-
-
 from django.contrib.admin.views.decorators import staff_member_required
+from rest_framework.decorators import api_view
+from rest_framework import status
+from rest_framework.response import Response
+
+from .forms import LoginForm, SignupForm
+from .models import AuthConfiguration
+
+# auth
+
+@csrf_exempt
+@require_GET
+@api_view(['GET'])
+def get_web_auth_enabled(request):
+    auth_config: AuthConfiguration = AuthConfiguration.get_solo()
+    return Response(auth_config.web_auth_enabled)
 
 
+@api_view(['POST'])
+@permission_required('posts.add_post', raise_exception=True)
+def enable_web_auth(request):
+    is_enable = request.POST.get('enable')
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# signup
 
 def get_user_with_email(email):
     try:
@@ -46,7 +65,7 @@ def signup(request):
                 return HttpResponseRedirect(reverse('login'))
                 # return render(request, 'auth_test/signup.html', context)
             return render(request, 'auth_test/signup.html', {'form': form})
-        #get
+        # get
         else:
             form = SignupForm()
             context = {
@@ -54,15 +73,17 @@ def signup(request):
             }
             return render(request, 'auth_test/signup.html', context)
 
+# login
+
 
 def login_user(request):
     """Checks logged in status"""
-    if request.user.is_authenticated: 
+    if request.user.is_authenticated:
         next_url = request.GET.get('next')
         if next_url:
             response = HttpResponseRedirect(next_url)
             response.set_cookie('username', request.user.username)
-            return response   
+            return response
         else:
             response = HttpResponseRedirect('/login_redirect/')
             response.set_cookie('username', request.user.username)
@@ -85,11 +106,11 @@ def login_user(request):
                     response.set_cookie('username')
                     return response
             else:
-                try: 
+                try:
                     user = User.objects.get(username=request.POST['username'])
                     if not user.is_active:
                         error = 'Email is not verified. Please check your email'
-                    else: 
+                    else:
                         error = 'Password is incorrect'
                 except:
                     error = 'We cannot find an account with that ID'
@@ -100,10 +121,10 @@ def login_user(request):
                 }
                 return render(request, 'auth_test/login.html', context)
 
-        #get
+        # get
         else:
             form = LoginForm()
-        
+
         return render(request, 'auth_test/login.html', {'form': form})
 
 
@@ -115,7 +136,7 @@ def logout_user(request):
         if next_url:
             response = HttpResponseRedirect(next_url)
             response.delete_cookie('username')
-            return response   
+            return response
         else:
             response = HttpResponseRedirect('/login/')
             response.delete_cookie('username')
@@ -127,7 +148,3 @@ def logout_user(request):
 @login_required(login_url="/login")
 def login_redirect(req):
     return render(req, 'auth_test/login_redirect.html')
-
-
-
-
