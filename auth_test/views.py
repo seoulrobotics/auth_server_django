@@ -32,8 +32,9 @@ def get_web_auth_enabled(request):
 @api_view(['POST'])
 @permission_required('posts.add_post', raise_exception=True)
 def enable_web_auth(request):
-    is_enable = request.POST.get('enable')
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    is_enable = request.POST.get('enable') == 'true'
+    AuthConfiguration.get_solo().web_auth_enabled = is_enable
+    return Response(status=status.HTTP_200_OK)
 
 
 # signup
