@@ -44,7 +44,7 @@ class CanEnableAuthUserInline(admin.StackedInline):
 # Define a new User admin
 class UserAdmin(BaseUserAdmin):
     list_display = ('product_name',) + BaseUserAdmin.list_display
-    fields = ('product_name',)
+    # fields = ('product_name',)
     # fieldsets = ((None, {
     #     'fields': ('product_name',)
     # }),) + BaseUserAdmin.fieldsets
