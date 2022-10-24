@@ -1,4 +1,4 @@
-"""auth_test URL Configuration
+"""sr_auth URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
@@ -24,7 +24,6 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('login_redirect/', views.login_redirect,
          name='login_redirect'),
-    path('get_web_auth_enabled/', views.get_web_auth_enabled,
-         name='get_web_auth_enabled'),
-    path('enable_web_auth/', views.enable_web_auth, name='enable_web_auth'),
+    path('can_use/<str:product_name>', views.can_use, name='can_use'),
+
 ]

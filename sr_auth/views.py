@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from .forms import LoginForm, SignupForm
-from .models import AuthConfiguration
+from .models import ProductAuth, Product
 
 # auth
 
@@ -60,19 +60,19 @@ def signup(request):
                         'form': form,
                         'error': error
                     }
-                    return render(request, 'auth_test/signup.html', context)
+                    return render(request, 'sr_auth/signup.html', context)
                 new_user = User.objects.create_user(**form.cleaned_data)
                 new_user.is_active = True
                 return HttpResponseRedirect(reverse('login'))
-                # return render(request, 'auth_test/signup.html', context)
-            return render(request, 'auth_test/signup.html', {'form': form})
+                # return render(request, 'sr_auth/signup.html', context)
+            return render(request, 'sr_auth/signup.html', {'form': form})
         # get
         else:
             form = SignupForm()
             context = {
                 'form': form
             }
-            return render(request, 'auth_test/signup.html', context)
+            return render(request, 'sr_auth/signup.html', context)
 
 # login
 
@@ -120,13 +120,13 @@ def login_user(request):
                     'form': form,
                     'error': error
                 }
-                return render(request, 'auth_test/login.html', context)
+                return render(request, 'sr_auth/login.html', context)
 
         # get
         else:
             form = LoginForm()
 
-        return render(request, 'auth_test/login.html', {'form': form})
+        return render(request, 'sr_auth/login.html', {'form': form})
 
 
 @login_required(login_url="/login")
@@ -143,9 +143,26 @@ def logout_user(request):
             response.delete_cookie('username')
             return response
     else:
-        return render(request, 'auth_test/logout.html')
+        return render(request, 'sr_auth/logout.html')
 
 
 @login_required(login_url="/login")
 def login_redirect(req):
-    return render(req, 'auth_test/login_redirect.html')
+    return render(req, 'sr_auth/login_redirect.html')
+
+
+@require_GET
+@login_required(login_url="/product/login")
+def can_use(req, product_name):
+    """Checks is user is authorized for this product."""
+    try:
+        product = Product.objects.get(name=product_name)
+        product_auth = ProductAuth.objects.get(
+            product=product)
+
+        if(req.user.has_perm("can_use"))
+        
+
+    except:
+        return HttpResponseRedirect(reverse('register_product'))
+    return HttpResponse("owns product")
