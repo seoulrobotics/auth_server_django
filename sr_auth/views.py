@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.conf import settings
@@ -17,24 +16,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from .forms import LoginForm, SignupForm
-from .models import ProductAuth, Product
-
-# auth
-
-@csrf_exempt
-@require_GET
-@api_view(['GET'])
-def get_web_auth_enabled(request):
-    auth_config: AuthConfiguration = AuthConfiguration.get_solo()
-    return Response(auth_config.web_auth_enabled)
-
-
-@api_view(['POST'])
-@permission_required('posts.add_post', raise_exception=True)
-def enable_web_auth(request):
-    is_enable = request.POST.get('enable') == 'true'
-    AuthConfiguration.get_solo().web_auth_enabled = is_enable
-    return Response(status=status.HTTP_200_OK)
+from .models import CanEnableAuthUser, CanUseUser,ProductAuth, Product
 
 
 # signup
@@ -151,18 +133,70 @@ def login_redirect(req):
     return render(req, 'sr_auth/login_redirect.html')
 
 
+# auth
+
+# @csrf_exempt
+# @require_GET
+# @api_view(['GET'])
+# def get_web_auth_enabled(request):
+#     auth_config: AuthConfiguration = AuthConfiguration.get_solo()
+#     return Response(auth_config.web_auth_enabled)
+
+
+@api_view(['POST'])
+@login_required(login_url="/product/login")
+def enable_auth(request, product_name):
+    try:
+        is_enable = request.POST.get('enable') == 'true'
+        product = Product.objects.get(name=product_name)
+        product_auth = ProductAuth.objects.get(
+            product=product)
+        #check if the current user can dis/enable auth of this product,throws
+        CanEnableAuthUser.objects.get(
+            product_auth=product_auth, user=request.user)
+        changed = product_auth.enabled != is_enable
+        if changed:
+            product_auth.enabled = is_enable
+        return Response(changed)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@login_required(login_url="/product/login")
+def auth_status(request, product_name):
+    try:
+        is_enable = request.POST.get('enable') == 'true'
+        product = Product.objects.get(name=product_name)
+        product_auth = ProductAuth.objects.get(
+            product=product)
+        try:
+            #check if the current user can dis/enable auth of this product,throws
+            CanEnableAuthUser.objects.get(
+                product_auth=product_auth, user=request.user)
+        except:
+            context = {
+                'permission_info': f'enable/disable {product.name} authentication'
+            }
+            return render(request, 'sr_auth/error_no_permission.html', context)
+
+        context = {
+            'product': product.name,
+            'product_auth_enabled': is_enable
+        }
+        return render(request, 'sr_auth/enable_auth.html', context)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
 @require_GET
 @login_required(login_url="/product/login")
-def can_use(req, product_name):
+def can_use(request, product_name):
     """Checks is user is authorized for this product."""
     try:
         product = Product.objects.get(name=product_name)
         product_auth = ProductAuth.objects.get(
             product=product)
-
-        if(req.user.has_perm("can_use"))
-        
-
+        CanUseUser.objects.get(
+            product_auth=product_auth, user=request.user)
     except:
-        return HttpResponseRedirect(reverse('register_product'))
-    return HttpResponse("owns product")
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return Response("can use product")

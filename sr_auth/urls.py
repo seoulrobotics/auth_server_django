@@ -25,5 +25,10 @@ urlpatterns = [
     path('login_redirect/', views.login_redirect,
          name='login_redirect'),
     path('can_use/<str:product_name>', views.can_use, name='can_use'),
-
+    path('auth_status/<str:product_name>',
+         views.auth_status, name='auth_status'),
+    path('enable_auth/<str:product_name>',
+         views.enable_auth, name='enable_auth'),
+    # path('get_auth_enabled/<str:product_name>',
+    #      views.enable_auth, name='get_auth_enabled'),
 ]

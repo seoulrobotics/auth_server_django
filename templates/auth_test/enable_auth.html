@@ -1,0 +1,22 @@
+{% extends 'sr_auth/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  SR Authentication Server
+{% endblock %}
+
+{% block content %}
+
+    <h1>{{product}} Auth Status</h1>
+    {% if product_auth_enabled %}
+      <h2>Authentication enabled.</h2>
+      <form action="/enable_auth/{{product}}" method="post">
+        <button class="btn btn-secondary w-100 m-1" name="enable" value="false">Disable {{product}} authentication</button>
+      </form>
+    {% else %}
+      <h2>Authentication disabled.</h2>
+      <form action="/enable_auth/{{product}}" method="post">
+        <button class="btn btn-secondary w-100 m-1" name="enable" value="true">Enable {{product}} authentication</button>
+      </form>
+    {% endif %}
+{% endblock %}
