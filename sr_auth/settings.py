@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'crispy_forms',
-    'rest_framework'
+    'rest_framework',
+    'sr_auth.apps.SRAuthServiceConfig',
 ]
 
 MIDDLEWARE = [
