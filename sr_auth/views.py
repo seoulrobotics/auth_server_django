@@ -185,7 +185,12 @@ def auth_status(request, product_name):
         }
         return render(request, 'sr_auth/enable_auth.html', context)
     except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        context = {
+            'permission_info': f'get status of {product.name} authentication'
+        }
+        return render(request, 'sr_auth/error_no_permission.html', context)
+
+        # return Response(status=status.HTTP_404_NOT_FOUND)
 
 @require_GET
 @login_required(login_url="/product/login")

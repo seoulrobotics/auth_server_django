@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+
 class Product(models.Model):
     name = models.CharField(max_length=200, unique=True,
                             primary_key=True, help_text="Name of the product")
@@ -24,23 +25,23 @@ class ProductAuth(models.Model):
     #     verbose_name = "Auth Configuration"
 
 class CanUseUser(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=False, blank=False, unique=False)
     product_auth = models.ForeignKey(
         ProductAuth, on_delete=models.CASCADE, null=False, blank=False)
 
     def __str__(self):
-        return f"Can use {self.product_auth.product.name}"
+        return f"{self.user.username} can use {self.product_auth.product.name}"
     
     
 class CanEnableAuthUser(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=False, blank=False, unique=False)
     product_auth = models.ForeignKey(
         ProductAuth, on_delete=models.CASCADE, null=False, blank=False)
     
     def __str__(self):
-        return f"Can enable authentication of {self.product_auth.product.name}"
+        return f"{self.user.username} can enable authentication of {self.product_auth.product.name}"
 
 
 
