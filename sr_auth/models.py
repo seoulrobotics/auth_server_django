@@ -22,7 +22,7 @@ class ProductAuth(models.Model):
         return f"{self.product.name} Auth"
     class Meta:
         permissions = [
-            ("can_enable_auth", "Can enable of disable authentication for this product."),
+            ("can_enable_auth", "Can enable or disable authentication for this product."),
             ("can_use", "Can be authorized to use this product"),
         ]
 
