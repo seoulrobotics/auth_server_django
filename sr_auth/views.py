@@ -1,3 +1,4 @@
+import re
 from django.core import exceptions
 
 from django.shortcuts import render
@@ -15,8 +16,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 
-from .forms import LoginForm, SignupForm
-from .models import CanEnableAuthUser, CanUseUser,ProductAuth, Product
+from .forms import LoginForm, SignupForm, EnableAuthForm
+from .models import ProductAuth, Product
 
 
 # signup
@@ -133,75 +134,86 @@ def login_redirect(req):
     return render(req, 'sr_auth/login_redirect.html')
 
 
-# auth
-
-# @csrf_exempt
-# @require_GET
-# @api_view(['GET'])
-# def get_web_auth_enabled(request):
-#     auth_config: AuthConfiguration = AuthConfiguration.get_solo()
-#     return Response(auth_config.web_auth_enabled)
 
 
-@api_view(['POST'])
-@login_required(login_url="/product/login")
-def enable_auth(request, product_name):
-    try:
-        is_enable = request.POST.get('enable') == 'true'
-        product = Product.objects.get(name=product_name)
-        product_auth = ProductAuth.objects.get(
-            product=product)
-        #check if the current user can dis/enable auth of this product,throws
-        CanEnableAuthUser.objects.get(
-            product_auth=product_auth, user=request.user)
+def enable_auth_impl(product_name, user,  is_enable):
+    product = Product.objects.get(name=product_name)
+    product_auth = ProductAuth.objects.get(
+        product=product)
+    if user.has_perm('can_enable_auth', product_auth):
         changed = product_auth.enabled != is_enable
         if changed:
             product_auth.enabled = is_enable
-        return Response(changed)
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+            product_auth.save()
+    else:
+        raise Exception("User do not have permission")
 
 
-@login_required(login_url="/product/login")
-def auth_status(request, product_name):
+@login_required(login_url="/login")
+def enable_auth(request, product_name):
     try:
         is_enable = request.POST.get('enable') == 'true'
-        product = Product.objects.get(name=product_name)
-        product_auth = ProductAuth.objects.get(
-            product=product)
-        try:
-            #check if the current user can dis/enable auth of this product,throws
-            CanEnableAuthUser.objects.get(
-                product_auth=product_auth, user=request.user)
-        except:
-            context = {
-                'permission_info': f'enable/disable {product.name} authentication'
-            }
-            return render(request, 'sr_auth/error_no_permission.html', context)
-
-        context = {
-            'product': product.name,
-            'product_auth_enabled': is_enable
-        }
-        return render(request, 'sr_auth/enable_auth.html', context)
+        enable_changed = enable_auth_impl(product_name, request.user, is_enable)
+        return Response(enable_changed)
     except:
+        pass
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@login_required(login_url="/login")
+def auth_status(request, product_name):
+    product = Product.objects.get(name=product_name)
+    product_auth = ProductAuth.objects.get(
+        product=product)
+    if request.method == 'POST':
+        # Create a form instance and populate it with data from the request (binding):
+        form = EnableAuthForm(
+            request.POST, current_val=product_auth.enabled, product_name=product_name)
+        # Check if the form is valid:/
+        if form.is_valid():
+            is_enabled = form.cleaned_data['enable']
+            try:
+                enable_auth_impl(
+                    product_name, request.user, is_enabled)
+                form = EnableAuthForm(
+                    current_val=is_enabled, product_name=product_name)
+                context = {
+                    'form': form,
+                    'product': product.name,
+                    'product_auth_enabled': is_enabled,
+                    'auth_enable_permission': request.user.has_perm('can_enable_auth', product_auth),
+                }
+                return render(request, 'sr_auth/enable_auth.html', context)
+            except Exception as e:
+                print(e)
         context = {
             'permission_info': f'get status of {product.name} authentication'
         }
         return render(request, 'sr_auth/error_no_permission.html', context)
+    # If this is a GET (or any other method) create the default form.
+    else:
 
-        # return Response(status=status.HTTP_404_NOT_FOUND)
+        is_enable = product_auth.enabled
+        form = EnableAuthForm(current_val=product_auth.enabled, product_name=product_name)
+        context = {
+            'form': form,
+            'product': product.name,
+            'product_auth_enabled': is_enable,
+            'auth_enable_permission': request.user.has_perm('can_enable_auth', product_auth),
+        }
+        return render(request, 'sr_auth/enable_auth.html', context)
+
 
 @require_GET
-@login_required(login_url="/product/login")
+@login_required(login_url="/login")
 def can_use(request, product_name):
     """Checks is user is authorized for this product."""
     try:
         product = Product.objects.get(name=product_name)
         product_auth = ProductAuth.objects.get(
             product=product)
-        CanUseUser.objects.get(
-            product_auth=product_auth, user=request.user)
+        if request.user.has_perm('can_enable_auth', product_auth):
+            return Response("can use product")
     except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    return Response("can use product")
+        pass
+    return Response(status=status.HTTP_404_NOT_FOUND)

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
     'rest_framework',
+    'guardian',
     'sr_auth.apps.SRAuthServiceConfig',
 ]
 
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'sr_auth.urls'
@@ -85,6 +87,12 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+#guardian
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 
 # Password validation

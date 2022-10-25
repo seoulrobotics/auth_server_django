@@ -9,14 +9,17 @@
 
     <h1>{{product}} Auth Status</h1>
     {% if product_auth_enabled %}
-      <h2>Authentication enabled.</h2>
-      <form action="/enable_auth/{{product}}" method="post">
-        <button class="btn btn-secondary w-100 m-1" name="enable" value="false">Disable {{product}} authentication</button>
-      </form>
+      <p>Authentication enabled.</p>
     {% else %}
-      <h2>Authentication disabled.</h2>
-      <form action="/enable_auth/{{product}}" method="post">
-        <button class="btn btn-secondary w-100 m-1" name="enable" value="true">Enable {{product}} authentication</button>
-      </form>
+      <p>Authentication disabled.</p>
+    {% endif %}
+
+    
+    {% if auth_enable_permission %}
+    <form action=""  method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-success w-100 m-1">Apply</button>
+    </form>
     {% endif %}
 {% endblock %}

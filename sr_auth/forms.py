@@ -73,3 +73,17 @@ class SignupForm(forms.ModelForm):
         model = User
         fields = ['username', 'email', 'password']
 
+
+class EnableAuthForm(forms.Form):
+    enable = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        current_val = kwargs.pop('current_val')
+        product_name = kwargs.pop('product_name')
+
+
+        super(EnableAuthForm, self).__init__(*args, **kwargs)
+        self.fields['enable'].initial = current_val
+        self.fields['enable'].label = f"Enable {product_name} authentication."
+
+

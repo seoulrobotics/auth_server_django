@@ -20,29 +20,9 @@ class ProductAuth(models.Model):
 
     def __str__(self):
         return f"{self.product.name} Auth"
-
-    # class Meta:
-    #     verbose_name = "Auth Configuration"
-
-class CanUseUser(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=False, blank=False, unique=False)
-    product_auth = models.ForeignKey(
-        ProductAuth, on_delete=models.CASCADE, null=False, blank=False)
-
-    def __str__(self):
-        return f"{self.user.username} can use {self.product_auth.product.name}"
-    
-    
-class CanEnableAuthUser(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=False, blank=False, unique=False)
-    product_auth = models.ForeignKey(
-        ProductAuth, on_delete=models.CASCADE, null=False, blank=False)
-    
-    def __str__(self):
-        return f"{self.user.username} can enable authentication of {self.product_auth.product.name}"
-
-
-
+    class Meta:
+        permissions = [
+            ("can_enable_auth", "Can enable of disable authentication for this product."),
+            ("can_use", "Can be authorized to use this product"),
+        ]
 
