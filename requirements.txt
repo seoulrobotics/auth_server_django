@@ -3,3 +3,4 @@ django-cors-headers==3.10.1
 django-crispy-forms==1.13.0
 django-solo==2.0.0
 djangorestframework==3.14.0
+django-guardian==2.4.0
