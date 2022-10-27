@@ -14,16 +14,4 @@ class CrossDomainSessionMiddleware:
                 default_session_domain = session_cookie['domain']
                 if host in settings.SR_SESSION_COOKIE_DOMAINS:
                     session_cookie['domain'] = host
-                # print(session_cookie['domain'])
-                # print(host)
-                
-            # print(f"host! {host}")
-            # # check if it's a different domain
-            # if host not in settings.SESSION_COOKIE_DOMAIN:
-            #     domain = ".{domain}".format(domain=host)
-                
-            #     for cookie in response.cookies:
-            #         if 'domain' in response.cookies[cookie]:
-            #             print(f"found! {domain}")
-            #             response.cookies[cookie]['domain'] = domain
         return response

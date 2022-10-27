@@ -228,9 +228,10 @@ def auth_status(request, product_name):
 def can_use_redirect(request, product_name):
     """Checks is user is authorized for this product. Redirect to login if needed."""
     reply, tkn_key, tkn_val = can_use_impl(request, product_name)
+    next_url = request.GET.get('next')
     manual_cookie_expires = datetime.datetime.now() + datetime.timedelta(days=365)
     if reply["result"] == True:
-        next_url = request.GET.get('next')
+
         if next_url:
             response =  HttpResponseRedirect(next_url)
             response.set_cookie(
@@ -289,7 +290,8 @@ def can_use_impl(request, product_name):
             #TODO: Contents of auth success cookie does not matter for now, in future, this is value given to SENSR to be cross checked with auth server again
             # auth server -> WebFE -> SENSR -> auth server(cross check)
             cookie_val = request.session.session_key
-            
+    
+    print(reply)
     return reply, f'use_authorization_{product_name}', cookie_val
 
 

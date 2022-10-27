@@ -6,11 +6,12 @@
 {% endblock %}
 
 {% block content %}
-    <p>{{error_msg}}</p>
+  <h1>Product Login</h1>
+  <p>{{error_msg}}</p>
 
-    {% if return_addr %}
-      <button class="btn btn-secondary w-100 m-1" type="submit" value="True" onclick="location.href='{{return_addr}}'" name='clicked'>
-        Return
-      </button>
-    {% endif %}
+  {% if return_addr %}
+    <button class="btn btn-secondary w-100 m-1" type="submit" value="True" onclick="location.href='{{return_addr}}'" name='clicked'>
+      Return
+    </button>
+  {% endif %}
 {% endblock %}
