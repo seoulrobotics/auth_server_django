@@ -1,0 +1,40 @@
+{% extends 'sr_auth/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  SR Authentication Server
+{% endblock %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <p>Already logged in {{ user.username }}, close browser</p> 
+  {% else %}
+
+    <h1>Login</h1>
+    <br>
+    <hr class="mt-4 mb-4">
+
+    <form class="login" method="POST">
+      {% csrf_token %}
+      {% if form.errors %}
+        {% for message in form.errors.values %}
+          <h5> {{ message }} </h5>
+        {% endfor %}
+      {% endif %}  
+      {% if error %}
+          <h5> {{ error }} </h5>
+      {% endif %}
+      {% crispy form %}
+    </form>
+    <div class='form-row'>
+      <a class="btn btn-secondary w-100 m-1" href="/signup" role="button">
+        Sign up
+      </a>
+    </div>
+    <div class='form-row'>
+      <a class="btn btn-link w-100 m-1" href="/accounts/password/reset" role="button">
+        Forgot your account?
+      </a>
+    </div>
+  {% endif %}
+{% endblock %}
