@@ -1,6 +1,7 @@
+from cmath import exp
 import re
 from django.core import exceptions
-
+import datetime
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
@@ -8,10 +9,14 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils import timezone
+from django.http import JsonResponse
+
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
@@ -21,7 +26,6 @@ from .models import ProductAuth, Product
 
 
 # signup
-
 def get_user_with_email(email):
     try:
         return User.objects.get(email=email)
@@ -63,6 +67,7 @@ def signup(request):
 def login_user(request):
     """Checks logged in status"""
     if request.user.is_authenticated:
+        print("logged in")
         next_url = request.GET.get('next')
         if next_url:
             response = HttpResponseRedirect(next_url)
@@ -73,6 +78,8 @@ def login_user(request):
             response.set_cookie('username', request.user.username)
             return response
     else:
+        print("trying logged in")
+
         if request.method == 'POST':
             form = LoginForm(request.POST)
             id = request.POST['username']
@@ -134,9 +141,18 @@ def login_redirect(req):
     return render(req, 'sr_auth/login_redirect.html')
 
 
+# auth
+
+#invalidates all login session cookies, useful when auth have changed
+def remove_all_sessions():
+    pass
+    # all_sessions = Session.objects.filter(
+    #     expire_date__gte=timezone.now())
+    # for session in Session.objects.all():
+    #     session.delete()
 
 
-def enable_auth_impl(product_name, user,  is_enable):
+def enable_auth_impl(product_name, user, is_enable):
     product = Product.objects.get(name=product_name)
     product_auth = ProductAuth.objects.get(
         product=product)
@@ -145,11 +161,13 @@ def enable_auth_impl(product_name, user,  is_enable):
         if changed:
             product_auth.enabled = is_enable
             product_auth.save()
+            remove_all_sessions()
     else:
         raise Exception("User do not have permission")
 
 
 @login_required(login_url="/login")
+@api_view(['POST'])
 def enable_auth(request, product_name):
     try:
         is_enable = request.POST.get('enable') == 'true'
@@ -204,16 +222,68 @@ def auth_status(request, product_name):
         return render(request, 'sr_auth/enable_auth.html', context)
 
 
-@require_GET
+
 @login_required(login_url="/login")
+@api_view(['GET'])
+def can_use_redirect(request, product_name):
+    """Checks is user is authorized for this product. Redirect to login if needed."""
+    result = can_use_impl(request, product_name)
+    next_url = request.GET.get('next')
+    if next_url:
+        return HttpResponseRedirect(next_url)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    
+    
+
+
+def can_use_impl(request, product_name):
+    """Checks is user is authorized for this product."""
+    reply = {"result": False, "cause": "unknown"}
+    manual_cookie_expires = datetime.datetime.now() + datetime.timedelta(days=365)
+    cookie_val = "disabled"
+
+    try:
+        product = Product.objects.get(name=product_name)
+        product_auth = ProductAuth.objects.get(product=product)
+
+        if not product_auth.enabled:
+            reply["result"] = True
+            reply["cause"] = "auth_disabled"
+
+        elif not request.user.is_authenticated:
+            reply["result"] = False
+            reply["cause"] = "user_not_logged_in"
+
+        elif request.user.has_perm('can_enable_auth', product_auth):
+            reply["result"] = True
+            reply["cause"] = "has_use_permission"
+            #TODO: Contents of auth success cookie does not matter for now, in future, this is value given to SENSR to be cross checked with auth server again
+            # auth server -> WebFE -> SENSR -> auth server(cross check)
+            cookie_val = request.session.session_key
+    except:
+        pass
+
+    response = JsonResponse(reply)
+    response.set_cookie(
+        f'use_authorization_{product_name}', value=cookie_val, expires=manual_cookie_expires)
+    return response
+
+
+@api_view(['GET'])
 def can_use(request, product_name):
+    """Checks is user is authorized for this product."""
+    return can_use_impl(request,product_name)
+
+
+@api_view(['GET'])
+def get_auth_enabled(request, product_name):
     """Checks is user is authorized for this product."""
     try:
         product = Product.objects.get(name=product_name)
         product_auth = ProductAuth.objects.get(
             product=product)
-        if request.user.has_perm('can_enable_auth', product_auth):
-            return Response("can use product")
+        return Response(product_auth.enabled)
     except:
-        pass
-    return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(False)

@@ -47,12 +47,14 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'sr_auth.middleware.cross_domain_session_middleware.CrossDomainSessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'sr_auth.urls'
@@ -138,20 +140,37 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
+
+# #TODO: This should be editable for WebFE non-local install
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+# ]
+
+# for our custom CORS session middleware
+SR_SESSION_COOKIE_DOMAINS = {
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:9020',
+    'http://127.0.0.1:9020',
+}
+
+SESSION_COOKIE_NAME = 'sessionid'
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-
-]
 
 
+#TODO: CORS is disabled for 3.XX, re-enable it for 4.XX
+# SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+
 SESSION_COOKIE_AGE = 120960000
 # SESSION_COOKIE_DOMAIN = 'seoulrobotics.org'
-SESSION_COOKIE_HTTPONLY = False
 # SESSION_DOMAIN_NAME = 'seoulrobotics.org'
-SESSION_COOKIE_SECURE = False
 
+SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SECURE = False
 ACCOUNT_SESSION_REMEMBER = True
 
 LOGIN_URL = '/login_redirect'

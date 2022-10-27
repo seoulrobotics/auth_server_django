@@ -24,11 +24,20 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('login_redirect/', views.login_redirect,
          name='login_redirect'),
+    
+    
+    #Auth
+    path('get_auth_enabled/<str:product_name>',
+         views.get_auth_enabled, name='get_auth_enabled'),
+    path('can_use_redirect/<str:product_name>',
+         views.can_use_redirect, name='can_use_redirect'),
+
+    
+    #RAuth REST API
     path('can_use/<str:product_name>', views.can_use, name='can_use'),
     path('auth_status/<str:product_name>',
          views.auth_status, name='auth_status'),
     path('enable_auth/<str:product_name>',
          views.enable_auth, name='enable_auth'),
-    # path('get_auth_enabled/<str:product_name>',
-    #      views.enable_auth, name='get_auth_enabled'),
+
 ]
