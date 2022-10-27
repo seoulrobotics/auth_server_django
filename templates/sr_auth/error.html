@@ -1,0 +1,16 @@
+{% extends 'sr_auth/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  SR Authentication Server
+{% endblock %}
+
+{% block content %}
+    <p>{{error_msg}}</p>
+
+    {% if return_addr %}
+      <button class="btn btn-secondary w-100 m-1" type="submit" value="True" onclick="location.href='{{return_addr}}'" name='clicked'>
+        Return
+      </button>
+    {% endif %}
+{% endblock %}

@@ -1,4 +1,5 @@
 from cmath import exp
+import json
 import re
 from django.core import exceptions
 import datetime
@@ -145,11 +146,10 @@ def login_redirect(req):
 
 #invalidates all login session cookies, useful when auth have changed
 def remove_all_sessions():
-    pass
-    # all_sessions = Session.objects.filter(
-    #     expire_date__gte=timezone.now())
-    # for session in Session.objects.all():
-    #     session.delete()
+    all_sessions = Session.objects.filter(
+        expire_date__gte=timezone.now())
+    for session in Session.objects.all():
+        session.delete()
 
 
 def enable_auth_impl(product_name, user, is_enable):
@@ -205,9 +205,9 @@ def auth_status(request, product_name):
             except Exception as e:
                 print(e)
         context = {
-            'permission_info': f'get status of {product.name} authentication'
+            'error_msg': f'Sorry, you do not have permission for {product_name}.'
         }
-        return render(request, 'sr_auth/error_no_permission.html', context)
+        return render(request, 'sr_auth/error.html', context)
     # If this is a GET (or any other method) create the default form.
     else:
 
@@ -227,27 +227,54 @@ def auth_status(request, product_name):
 @api_view(['GET'])
 def can_use_redirect(request, product_name):
     """Checks is user is authorized for this product. Redirect to login if needed."""
-    result = can_use_impl(request, product_name)
-    next_url = request.GET.get('next')
-    if next_url:
-        return HttpResponseRedirect(next_url)
+    reply, tkn_key, tkn_val = can_use_impl(request, product_name)
+    manual_cookie_expires = datetime.datetime.now() + datetime.timedelta(days=365)
+    if reply["result"] == True:
+        next_url = request.GET.get('next')
+        if next_url:
+            response =  HttpResponseRedirect(next_url)
+            response.set_cookie(
+                tkn_key, value=tkn_val, expires=manual_cookie_expires)
+            return response
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        logout(request)
+        context = {
+            'error_msg': f'Error code: {reply["cause"]}.',
+        }
+        if next_url:
+            context['return_addr'] = next_url
+        return render(request, 'sr_auth/error.html', context)
 
-    
-    
+
+@api_view(['GET'])
+def can_use(request, product_name):
+    """Checks is user is authorized for this product."""
+    reply, tkn_key, tkn_val =  can_use_impl(request, product_name)
+    manual_cookie_expires = datetime.datetime.now() + datetime.timedelta(days=365)
+    response = JsonResponse(reply)
+    response.set_cookie(
+        tkn_key, value=tkn_val, expires=manual_cookie_expires)
+    return response
 
 
 def can_use_impl(request, product_name):
     """Checks is user is authorized for this product."""
     reply = {"result": False, "cause": "unknown"}
-    manual_cookie_expires = datetime.datetime.now() + datetime.timedelta(days=365)
     cookie_val = "disabled"
-
+    prod_auth_found = False
     try:
         product = Product.objects.get(name=product_name)
+    except:
+        reply["cause"] = "unknown_product"
+    try:
         product_auth = ProductAuth.objects.get(product=product)
-
+        prod_auth_found = True
+    except:
+        reply["cause"] = "auth_not_setup"
+    
+    if prod_auth_found:
         if not product_auth.enabled:
             reply["result"] = True
             reply["cause"] = "auth_disabled"
@@ -262,19 +289,10 @@ def can_use_impl(request, product_name):
             #TODO: Contents of auth success cookie does not matter for now, in future, this is value given to SENSR to be cross checked with auth server again
             # auth server -> WebFE -> SENSR -> auth server(cross check)
             cookie_val = request.session.session_key
-    except:
-        pass
-
-    response = JsonResponse(reply)
-    response.set_cookie(
-        f'use_authorization_{product_name}', value=cookie_val, expires=manual_cookie_expires)
-    return response
+            
+    return reply, f'use_authorization_{product_name}', cookie_val
 
 
-@api_view(['GET'])
-def can_use(request, product_name):
-    """Checks is user is authorized for this product."""
-    return can_use_impl(request,product_name)
 
 
 @api_view(['GET'])
