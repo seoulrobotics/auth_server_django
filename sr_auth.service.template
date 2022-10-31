@@ -1,0 +1,12 @@
+[Unit]
+Description=SR auth server service
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=python3 SERVER_CMD
+
+[Install]
+WantedBy=multi-user.target

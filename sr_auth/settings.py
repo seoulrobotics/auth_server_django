@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from ..setup_server import get_configs
+
+INIT_CONFIGS = get_configs()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_1#q5r*&@%i71d%205^x0mvf^n6s&01f1cg&rh67z1p@ihd_-x'
+#Rotates every re-init
+SECRET_KEY = INIT_CONFIGS["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -140,21 +144,19 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # #TODO: This should be editable for WebFE non-local install
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',
-#     'http://127.0.0.1:3000',
-# ]
+CORS_ALLOWED_ORIGINS = INIT_CONFIGS["SR_TRUSTED_DOMAINS"]
+SR_SESSION_COOKIE_DOMAINS = INIT_CONFIGS["SR_TRUSTED_DOMAINS"]
 
 # for our custom CORS session middleware
-SR_SESSION_COOKIE_DOMAINS = {
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:9020',
-    'http://127.0.0.1:9020',
-}
+# SR_SESSION_COOKIE_DOMAINS = {
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+#     'http://localhost:9020',
+#     'http://127.0.0.1:9020',
+# }
 
 SESSION_COOKIE_NAME = 'sessionid'
 CORS_ALLOW_CREDENTIALS = True
