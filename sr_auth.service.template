@@ -1,0 +1,9 @@
+[Unit]
+Description=SR auth server service
+[Service]
+Type=simple
+Restart=always
+ExecStart=SERVER_CMD
+User=SERVER_USER
+[Install]
+WantedBy=multi-user.target

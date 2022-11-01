@@ -237,7 +237,10 @@ def can_use_redirect(request, product_name):
                 tkn_key, value=tkn_val, expires=manual_cookie_expires)
             return response
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            response = JsonResponse(reply)
+            response.set_cookie(
+                tkn_key, value=tkn_val, expires=manual_cookie_expires)
+            return response
     else:
         logout(request)
         context = {

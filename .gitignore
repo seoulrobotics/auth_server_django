@@ -85,3 +85,6 @@ local_settings.py
 
 .env
 db.sqlite3
+sr_auth/config.json
+init_config.json
+sr_auth.service
