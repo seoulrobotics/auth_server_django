@@ -4,6 +4,7 @@ import os
 import sys
 from django.core.management.utils import get_random_secret_key
 import shutil
+import subprocess
 
 #config given by SENSR
 INIT_CONFIG_FILE_PATH = os.path.join(os.path.abspath(
@@ -26,6 +27,14 @@ SERIVCE_PATH = os.path.join(os.path.abspath(
     os.path.dirname(__file__)), "sr_auth.service")
 
 
+def get_path(executable: str) -> str:
+  search_result = subprocess.getoutput(f'which {executable}')
+  if executable in search_result:
+    return search_result
+  else:
+    print(
+        f"\033[91mThere is no {executable}. Please install PTPd first.\033[0m")
+    return ""
 
 def init_configs():
     with open(INIT_CONFIG_FILE_PATH, 'r') as file:
@@ -61,7 +70,8 @@ def create_service_file():
     with open(TEMPLATE_SERVICE, 'r') as file:
         service_script = file.read()
     service_script = service_script.replace(
-        'SERVER_CMD', f'python3 { os.path.join(os.path.dirname(__file__),"manage.py")} runserver')
+        'SERVER_CMD', f'{get_path("python3")} { os.path.join(os.path.dirname(__file__),"manage.py")} runserver')
+    service_script = service_script.replace('SERVER_USER', str(os.getuid()))
     with open(SERIVCE_PATH, 'w+') as file:
         try:
             file.write(service_script)
@@ -73,3 +83,4 @@ def create_service_file():
 if __name__ == "__main__":
     init_configs()
     init_db()
+    create_service_file()
