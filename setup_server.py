@@ -5,6 +5,11 @@ import sys
 from django.core.management.utils import get_random_secret_key
 import shutil
 
+#config given by SENSR
+INIT_CONFIG_FILE_PATH = os.path.join(os.path.abspath(
+    os.path.dirname(__file__)), "init_config.json")
+
+#generated config from this script
 CONFIG_FILE_PATH = os.path.join(os.path.abspath(
     os.path.dirname(__file__)), "config.json")
 
@@ -28,8 +33,9 @@ def get_configs():
         except JSONDecodeError:
             return {}
 
-def init_configs(init_config_json):
-    config = json.loads(init_config_json)    
+def init_configs():
+    with open(INIT_CONFIG_FILE_PATH, 'r') as file:
+        config = json.load(file)
     # create new secret key and overwrite
     config["SECRET_KEY"] = get_random_secret_key()
     
@@ -71,5 +77,5 @@ def create_service_file():
     
 
 if __name__ == "__main__":
-    init_configs(sys.argv[0])
+    init_configs()
     init_db()
