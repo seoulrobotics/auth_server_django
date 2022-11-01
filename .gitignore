@@ -87,3 +87,4 @@ local_settings.py
 db.sqlite3
 sr_auth/config.json
 init_config.json
+sr_auth.service
