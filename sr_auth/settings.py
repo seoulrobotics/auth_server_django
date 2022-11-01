@@ -12,7 +12,16 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-from ..setup_server import get_configs
+import json
+
+
+def get_configs():
+    CONFIG_FILE_PATH = os.path.join(os.path.abspath(
+        os.path.dirname(__file__)), "config.json")
+    with open(CONFIG_FILE_PATH, 'r') as file:
+        config = json.load(file)
+        return config
+
 
 INIT_CONFIGS = get_configs()
 

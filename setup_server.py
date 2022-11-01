@@ -11,7 +11,7 @@ INIT_CONFIG_FILE_PATH = os.path.join(os.path.abspath(
 
 #generated config from this script
 CONFIG_FILE_PATH = os.path.join(os.path.abspath(
-    os.path.dirname(__file__)), "config.json")
+    os.path.dirname(__file__)), "sr_auth/config.json")
 
 TEMPLATE_DB = os.path.join(os.path.abspath(
     os.path.dirname(__file__)), "db_template.sqlite3")
@@ -25,13 +25,7 @@ TEMPLATE_SERVICE = os.path.join(os.path.abspath(
 SERIVCE_PATH = os.path.join(os.path.abspath(
     os.path.dirname(__file__)), "sr_auth.service")
 
-def get_configs():
-    with open(CONFIG_FILE_PATH, 'r') as file:
-        try:
-            config = json.load(file)
-            return config
-        except JSONDecodeError:
-            return {}
+
 
 def init_configs():
     with open(INIT_CONFIG_FILE_PATH, 'r') as file:
