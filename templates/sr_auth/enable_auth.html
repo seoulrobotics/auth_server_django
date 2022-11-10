@@ -7,19 +7,21 @@
 
 {% block content %}
 
-    <h1>{{product}} Auth Status</h1>
+    <!-- <h1 class="sr_text">{{product}} Auth Status</h1> -->
+    <div class="d-flex justify-content-center mt-4">
     {% if product_auth_enabled %}
-      <p>Authentication enabled.</p>
+      <p class="sr_message">Authentication enabled.</p>
     {% else %}
-      <p>Authentication disabled.</p>
+      <p class="sr_message">Authentication disabled.</p>
     {% endif %}
+    </div>
 
     
     {% if auth_enable_permission %}
-    <form action=""  method="post">
+    <form action=""  method="post" class="sr_text">
       {% csrf_token %}
       {{ form|crispy }}
-      <button type="submit" class="btn btn-success w-100 m-1">Apply</button>
+      <button type="submit" class="sr_button w-100">Apply</button>
     </form>
     {% endif %}
 {% endblock %}
