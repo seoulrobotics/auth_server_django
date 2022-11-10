@@ -28,15 +28,6 @@
           </div>
           {% block content %}
           {% endblock %}
-          {% if user.is_authenticated %}
-          <div>
-            <form action="/logout" method="get">
-              <button class="button_default w-100 mt-2" type="submit" value="True" name='clicked' onclick="location.href ='/logout'">
-                  Logout
-              </button>
-            </form>
-          </div>
-          {% endif %}
         </div>
       </div>
     </div>

@@ -85,7 +85,7 @@ class EnableAuthForm(forms.Form):
 
 
         super(EnableAuthForm, self).__init__(*args, **kwargs)
-        self.fields['enable'].initial = current_val
+        self.fields['enable'].initial = not current_val
         self.fields['enable'].label = f"Enable {product_name} authentication."
 
 

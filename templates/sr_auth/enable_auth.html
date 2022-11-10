@@ -18,10 +18,14 @@
 
     
     {% if auth_enable_permission %}
-    <form action=""  method="post" class="sr_text">
+    <form action=""  method="post" class="sr_text enabled_form">
       {% csrf_token %}
       {{ form|crispy }}
-      <button type="submit" class="sr_button w-100">Apply</button>
+      {% if product_auth_enabled %}
+      <button type="submit" class="sr_button w-100">Disabled</button>
+      {% else %}
+      <button type="submit" class="sr_button w-100">Enabled</button>
+      {% endif %}
     </form>
     {% endif %}
 {% endblock %}

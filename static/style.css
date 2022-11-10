@@ -93,3 +93,7 @@
 .sr_hidden_input {
     display: none;
 }
+
+.enabled_form label {
+    display: none;
+}
