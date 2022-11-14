@@ -88,6 +88,7 @@ def login_user(request):
             if user is not None:
                 login(request, user=user)
                 next_url = request.GET.get('next')
+                
                 if next_url:
                     response = HttpResponseRedirect(next_url)
                     response.set_cookie('username', user.username)
@@ -286,7 +287,7 @@ def can_use_impl(request, product_name):
             reply["result"] = False
             reply["cause"] = "user_not_logged_in"
 
-        elif request.user.has_perm('can_enable_auth', product_auth):
+        elif request.user.has_perm('can_use', product_auth):
             reply["result"] = True
             reply["cause"] = "has_use_permission"
             #TODO: Contents of auth success cookie does not matter for now, in future, this is value given to SENSR to be cross checked with auth server again
