@@ -13,8 +13,11 @@ def init_settings(init_configs):
         product_auth = ProductAuth.objects.get(product=product_name)
         default_username = f'{product_name}_default_user'
         #remove existing default user
-        existing = User.objects.get(username = default_username)
-        existing.delete()
+        try:
+            existing = User.objects.get(username = default_username)
+            existing.delete()
+        except:
+            pass
         #add new default user with new password
         user=User.objects.create_user(default_username, password=password)
         
