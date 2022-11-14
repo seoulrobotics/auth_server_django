@@ -33,7 +33,10 @@ class LoginForm(forms.Form):
                 css_class='form-row'
             )
         )
-        self.fields['username'].initial = "admin"
+        if 'user_initial' in kwargs:
+            self.fields['username'].initial = kwargs.pop('user_initial')
+        else:
+            self.fields['username'].initial = "admin"
 
 
 class SignupForm(forms.ModelForm):

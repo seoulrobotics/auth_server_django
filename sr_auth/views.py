@@ -67,7 +67,6 @@ def signup(request):
 def login_user(request):
     """Checks logged in status"""
     if request.user.is_authenticated:
-        print("logged in")
         next_url = request.GET.get('next')
         if next_url:
             response = HttpResponseRedirect(next_url)
@@ -78,8 +77,7 @@ def login_user(request):
             response.set_cookie('username', request.user.username)
             return response
     else:
-        print("trying logged in")
-
+        next_url = request.GET.get('next')
         if request.method == 'POST':
             form = LoginForm(request.POST)
             id = request.POST['username']
@@ -87,7 +85,6 @@ def login_user(request):
             user = authenticate(username=id, password=pw)
             if user is not None:
                 login(request, user=user)
-                next_url = request.GET.get('next')
                 
                 if next_url:
                     response = HttpResponseRedirect(next_url)
@@ -115,8 +112,16 @@ def login_user(request):
 
         # get
         else:
-            form = LoginForm()
-
+            #TODO: in future with proper user management, might allow user to add their own usernames
+            #set default user name to default generated username coressponding to currently authenticating product name.
+            initial_username = "admin"
+            if next_url and 'can_use' in next_url:
+                product_auths = ProductAuth.objects.all()
+                for auth in product_auths:
+                    if auth.product.name in next_url:
+                        initial_username = f"{auth.product.name}_default_user"
+                        break
+            form = LoginForm(user_initial = initial_username)
         return render(request, 'sr_auth/login.html', {'form': form})
 
 
