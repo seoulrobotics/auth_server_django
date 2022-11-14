@@ -11,9 +11,12 @@ from crispy_forms.layout import Layout, Row, Column, Submit, Field, HTML
 
 class LoginForm(forms.Form):
     username = forms.CharField(label='ID')
-    password = forms.CharField(label='Password Required for Access', widget=forms.PasswordInput)
+    password = forms.CharField(label=False, widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
+        initial_username = "admin"
+        if 'user_initial' in kwargs:
+            initial_username = kwargs.pop('user_initial')
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -33,10 +36,7 @@ class LoginForm(forms.Form):
                 css_class='form-row'
             )
         )
-        if 'user_initial' in kwargs:
-            self.fields['username'].initial = kwargs.pop('user_initial')
-        else:
-            self.fields['username'].initial = "admin"
+        self.fields['username'].initial = initial_username
 
 
 class SignupForm(forms.ModelForm):

@@ -14,6 +14,10 @@
 
     <form class="login" method="POST">
       {% csrf_token %}
+      {% if access_str %}
+        <h5 class="sr_text"> {{ access_str }} </h5>
+      {% endif %}
+
       {% if form.errors %}
         {% for message in form.errors.values %}
           <h5 class="sr_text sr_message"> {{ message }} </h5>
@@ -24,15 +28,5 @@
       {% endif %}
       {% crispy form %}
     </form>
-    <!-- <div class='form-row'>
-      <a class="btn btn-secondary w-100 m-1" href="/signup" role="button">
-        Sign up
-      </a>
-    </div>
-    <div class='form-row'>
-      <a class="btn btn-link w-100 m-1" href="/accounts/password/reset" role="button">
-        Forgot your account?
-      </a>
-    </div> -->
   {% endif %}
 {% endblock %}

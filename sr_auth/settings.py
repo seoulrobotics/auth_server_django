@@ -15,8 +15,6 @@ import os
 import json
 from .init_settings import get_configs
 
-
-
 INIT_CONFIGS = get_configs()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

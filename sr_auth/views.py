@@ -78,6 +78,15 @@ def login_user(request):
             return response
     else:
         next_url = request.GET.get('next')
+        initial_username = "admin"
+        access_str = "Password Required for Access"
+        if next_url and ('can_use' in next_url or 'auth_status' in next_url):
+            product_auths = ProductAuth.objects.all()
+            for auth in product_auths:
+                if auth.product.name in next_url:
+                    initial_username = f"{auth.product.name}_default_user"
+                    access_str = f"Password Required for {auth.product.name}"
+                    break
         if request.method == 'POST':
             form = LoginForm(request.POST)
             id = request.POST['username']
@@ -106,23 +115,20 @@ def login_user(request):
 
                 context = {
                     'form': form,
+                    'access_str': access_str,
                     'error': error
                 }
                 return render(request, 'sr_auth/login.html', context)
-
         # get
         else:
             #TODO: in future with proper user management, might allow user to add their own usernames
             #set default user name to default generated username coressponding to currently authenticating product name.
-            initial_username = "admin"
-            if next_url and 'can_use' in next_url:
-                product_auths = ProductAuth.objects.all()
-                for auth in product_auths:
-                    if auth.product.name in next_url:
-                        initial_username = f"{auth.product.name}_default_user"
-                        break
             form = LoginForm(user_initial = initial_username)
-        return render(request, 'sr_auth/login.html', {'form': form})
+            context = {
+                'form': form,
+                'access_str': access_str,
+            }
+        return render(request, 'sr_auth/login.html', context)
 
 
 @login_required(login_url="/login")
