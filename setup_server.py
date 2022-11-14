@@ -42,7 +42,7 @@ def init_configs():
     # create new secret key and overwrite
     config["SECRET_KEY"] = get_random_secret_key()
     
-    config["SR_TRUSTED_DOMAINS"] = [
+    config["SR_TRUSTED_DOMAINS"] = config["SR_TRUSTED_DOMAINS"] + [
         "http://127.0.0.1:3000", "http://127.0.0.1:9020"]
     
     config["SR_TRUSTED_DOMAINS"] = list(

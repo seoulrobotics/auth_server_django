@@ -67,7 +67,6 @@ def signup(request):
 def login_user(request):
     """Checks logged in status"""
     if request.user.is_authenticated:
-        print("logged in")
         next_url = request.GET.get('next')
         if next_url:
             response = HttpResponseRedirect(next_url)
@@ -78,8 +77,16 @@ def login_user(request):
             response.set_cookie('username', request.user.username)
             return response
     else:
-        print("trying logged in")
-
+        next_url = request.GET.get('next')
+        initial_username = "admin"
+        access_str = "Password Required for Access"
+        if next_url and ('can_use' in next_url or 'auth_status' in next_url):
+            product_auths = ProductAuth.objects.all()
+            for auth in product_auths:
+                if auth.product.name in next_url:
+                    initial_username = f"{auth.product.name}_default_user"
+                    access_str = f"Password Required for {auth.product.name}"
+                    break
         if request.method == 'POST':
             form = LoginForm(request.POST)
             id = request.POST['username']
@@ -87,7 +94,7 @@ def login_user(request):
             user = authenticate(username=id, password=pw)
             if user is not None:
                 login(request, user=user)
-                next_url = request.GET.get('next')
+                
                 if next_url:
                     response = HttpResponseRedirect(next_url)
                     response.set_cookie('username', user.username)
@@ -108,15 +115,20 @@ def login_user(request):
 
                 context = {
                     'form': form,
+                    'access_str': access_str,
                     'error': error
                 }
                 return render(request, 'sr_auth/login.html', context)
-
         # get
         else:
-            form = LoginForm()
-
-        return render(request, 'sr_auth/login.html', {'form': form})
+            #TODO: in future with proper user management, might allow user to add their own usernames
+            #set default user name to default generated username coressponding to currently authenticating product name.
+            form = LoginForm(user_initial = initial_username)
+            context = {
+                'form': form,
+                'access_str': access_str,
+            }
+        return render(request, 'sr_auth/login.html', context)
 
 
 @login_required(login_url="/login")
@@ -286,7 +298,7 @@ def can_use_impl(request, product_name):
             reply["result"] = False
             reply["cause"] = "user_not_logged_in"
 
-        elif request.user.has_perm('can_enable_auth', product_auth):
+        elif request.user.has_perm('can_use', product_auth):
             reply["result"] = True
             reply["cause"] = "has_use_permission"
             #TODO: Contents of auth success cookie does not matter for now, in future, this is value given to SENSR to be cross checked with auth server again

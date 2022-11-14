@@ -11,29 +11,32 @@ from crispy_forms.layout import Layout, Row, Column, Submit, Field, HTML
 
 class LoginForm(forms.Form):
     username = forms.CharField(label='ID')
-    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password = forms.CharField(label=False, widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
+        initial_username = "admin"
+        if 'user_initial' in kwargs:
+            initial_username = kwargs.pop('user_initial')
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Row(
                 Column(
                     Field('username', css_class='form-control mb-4'),
-                    css_class='col-sm-6'
+                    css_class='sr_hidden_input'
                 ),
                 Column(
-                    Field('password', css_class='form-control mb-4'),
-                    css_class='col-sm-6'
+                    Field('password', css_class='sr_input mb-4 sr_text'),
+                    css_class="w-100"
                 ),
-                css_class='form-row'
+                css_class='form-row sr_text'
             ),
             Row(
-                Submit('submit', 'Sign in', css_class='btn btn-primary w-100 m-1'),
+                Submit('submit', 'Access', css_class='sr_button w-100'),
                 css_class='form-row'
             )
         )
-        self.fields['username'].initial = "admin"
+        self.fields['username'].initial = initial_username
 
 
 class SignupForm(forms.ModelForm):
@@ -85,7 +88,7 @@ class EnableAuthForm(forms.Form):
 
 
         super(EnableAuthForm, self).__init__(*args, **kwargs)
-        self.fields['enable'].initial = current_val
+        self.fields['enable'].initial = not current_val
         self.fields['enable'].label = f"Enable {product_name} authentication."
 
 

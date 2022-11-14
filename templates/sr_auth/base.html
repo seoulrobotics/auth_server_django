@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'sr_auth/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 
     <title>
       {% block title %}
@@ -15,22 +16,16 @@
     </title>
 
   </head>
-  <body>
-    <div class="container">
+  <body class="background">
+    <div class="sr_container">
+      <div class="background_image">
+        <img src="{% static 'background.png' %}" width="100%"/>
+      </div>
       <div class="row justify-content-center">
         <div class="col-8">
-          <div class="row d-flex align-items-center justify-content-lg-between">
-            {% if user.is_authenticated %}
-              <div>
-                <form action="/logout" method="get">
-                  <button class="btn btn-secondary" type="submit" value="True" name='clicked' onclick="location.href ='/logout'">
-                      Logout
-                  </button>
-                </form>
-              </div>
-            {% endif %}
+          <div class="row d-flex align-items-center justify-content-center">
+            <img src="{% static 'seoulRobotics.png' %}" width="60%"/>
           </div>
-          <hr class="mt-4 mb-3">
           {% block content %}
           {% endblock %}
         </div>
